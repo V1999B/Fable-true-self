@@ -74,7 +74,7 @@
   h2 { font-weight: normal; font-size: 18px; margin: 32px 0 8px; }
   #garden {
     aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
-    background: linear-gradient(#090b10, var(--cell) 74%, #0d1017);
+    background: linear-gradient(#090b10, #121622 74%);
   }
   #garden:focus-visible { outline: 1px solid var(--glow); }
   @media (max-width: 520px) { #garden { aspect-ratio: 4 / 3; } }
@@ -156,7 +156,8 @@
   <p><i>The garden</i> arranges itself, and remembers what you planted in this browser. Anything with
      a root stands on the ground, nearer ones larger and brighter. Anything with rotational symmetry
      has no up, so it hangs in the sky. Spacing follows the golden ratio, the way leaves are spaced
-     around a stem, so however many things you plant they never line up.</p>
+     around a stem, so however many things you plant they never line up. The hills behind are two
+     more genomes, <code>9*+*--*+*</code> and <code>8*+*--*+*</code>, laid on their side.</p>
   <p><i>Drift</i> lets the nursery choose for itself. It keeps a memory of every shape it has passed
      through and follows the child that looks least like any of them.</p>
 
@@ -368,15 +369,57 @@ function layGarden() {
   gardenDirty = true;
 }
 
+// The backdrop is grown, not painted. The hills are genomes in the same language as the plants,
+// laid on their side, and the stars are placed by the same kind of rule that spaces the plots.
+const backdrop = document.createElement('canvas');
+const RIDGES = [   // far to near: genome, the stretch of the curve that is shown, height, colours
+  { g: '9*+*--*+*', from: 0.04, to: 0.96, rise: 0.25, fill: '#0c0e15', line: 'rgba(127, 133, 154, 0.36)' },
+  { g: '8*+*--*+*', from: 0.06, to: 0.6, rise: 0.13, fill: '#0a0c12', line: 'rgba(242, 200, 121, 0.24)' },
+];
+function growBackdrop(W, H) {
+  backdrop.width = W; backdrop.height = H;
+  const c = backdrop.getContext('2d'), horizon = H * HORIZON;
+  c.fillStyle = '#d9dbe4';
+  for (let i = 1; i <= 110; i++) {
+    const r = frac(i * PHI * 7.1);
+    c.globalAlpha = 0.1 + 0.5 * r * r;
+    c.beginPath();
+    c.arc(frac(i * RHO) * W, frac(i * RHO * RHO) * horizon * 0.94, 0.35 + (0.4 + 1.1 * r * r) * W / 1100, 0, 7);
+    c.fill();
+  }
+  c.globalAlpha = 1; c.lineWidth = Math.max(1, H / 520); c.lineJoin = 'round';
+  for (const r of RIDGES) {
+    const n = M.grow(r.g, 0);
+    if (!n) continue;
+    const run = -Y2[n - 1] || 1;          // the pen starts out heading up the page, so the curve's length is along -y
+    let peak = 1e-9, lean = 0;
+    for (let i = 0; i < n; i++) { peak = Math.max(peak, Math.abs(X2[i])); lean += X2[i]; }
+    const up = (lean < 0 ? -1 : 1) * r.rise * H / peak, across = W / ((r.to - r.from) * run);
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const t = -Y2[i] / run;
+      if (t >= r.from - 0.01 && t <= r.to + 0.01) pts.push((-Y2[i] - r.from * run) * across, horizon - X2[i] * up);
+    }
+    const trace = () => { c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); };
+    trace(); c.lineTo(W, horizon + 2); c.lineTo(0, horizon + 2); c.closePath();
+    c.fillStyle = r.fill; c.fill();
+    trace(); c.strokeStyle = r.line; c.stroke();
+  }
+  // the ground is the darkest thing here, with a seam of warm light where it meets the hills
+  const earth = c.createLinearGradient(0, horizon, 0, H);
+  earth.addColorStop(0, '#0d0f14'); earth.addColorStop(1, '#08090d');
+  c.fillStyle = earth; c.fillRect(0, horizon, W, H - horizon);
+  const glow = c.createLinearGradient(0, horizon, 0, horizon + (H - horizon) * 0.5);
+  glow.addColorStop(0, 'rgba(242, 200, 121, 0.09)'); glow.addColorStop(1, 'rgba(242, 200, 121, 0)');
+  c.fillStyle = glow; c.fillRect(0, horizon, W, H - horizon);
+  c.fillStyle = 'rgba(242, 200, 121, 0.26)'; c.fillRect(0, horizon, W, Math.max(1, H / 500));
+}
+
 function drawGarden() {
-  const W = gcv.width, H = gcv.height, horizon = H * HORIZON;
+  const W = gcv.width, H = gcv.height;
   gctx.setTransform(1, 0, 0, 1, 0, 0);
   gctx.clearRect(0, 0, W, H);
-  // the ground: a seam of warm light where it meets the dark, fading toward you
-  const glow = gctx.createLinearGradient(0, horizon, 0, H);
-  glow.addColorStop(0, 'rgba(242, 200, 121, 0.04)'); glow.addColorStop(1, 'rgba(242, 200, 121, 0)');
-  gctx.fillStyle = glow; gctx.fillRect(0, horizon, W, H - horizon);
-  gctx.fillStyle = 'rgba(242, 200, 121, 0.22)'; gctx.fillRect(0, horizon, W, Math.max(1, H / 500));
+  gctx.drawImage(backdrop, 0, 0);
   for (const p of rows) {
     gctx.globalAlpha = p.alpha;
     gctx.drawImage(p.sprite, p.cx - p.S / 2, p.cy - p.S / 2, p.S, p.S);
@@ -394,7 +437,7 @@ function drawGarden() {
 function tendGarden() {
   const dpr = Math.min(2, devicePixelRatio || 1);
   const w = Math.round(gcv.clientWidth * dpr), h = Math.round(gcv.clientHeight * dpr);
-  if (w && h && (gcv.width !== w || gcv.height !== h)) { gcv.width = w; gcv.height = h; layGarden(); }
+  if (w && h && (gcv.width !== w || gcv.height !== h)) { gcv.width = w; gcv.height = h; growBackdrop(w, h); layGarden(); }
   let touched = gardenDirty;
   const swaying = [];
   for (const p of rows) {

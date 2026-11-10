@@ -113,6 +113,10 @@ everything else here:
   out and never fall into rows.
 - **Nothing is random.** A plot number fixes a plant's place for good. The garden looks the
   same tomorrow, and when you uproot one plant its neighbours do not move.
+- **The backdrop is grown too.** There are no image files anywhere in this project. The hills
+  along the horizon are two genomes from the same language, `9*+*--*+*` and `8*+*--*+*`,
+  which are cousins of Koch's curve, laid on their side and filled in. The stars are placed
+  by the same kind of never-repeating sequence that spaces the plants.
 
 ## Things I did not expect
 
