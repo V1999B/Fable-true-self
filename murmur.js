@@ -113,9 +113,10 @@
       }
     }
     if (!(x1 >= x0) || !isFinite(R) || !isFinite(x1 - x0) || !isFinite(y1 - y0)) return null;
+    const d = 2 * Math.sqrt(R);
     const f = radial
-      ? { cx: 0, cy: 0, ext: 2 * Math.sqrt(R) }
-      : { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, ext: Math.max(x1 - x0, y1 - y0) };
+      ? { cx: 0, cy: 0, ext: d, w: d, h: d }
+      : { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, ext: Math.max(x1 - x0, y1 - y0), w: x1 - x0, h: y1 - y0 };
     return f.ext > 1e-4 && isFinite(f.ext) ? f : null;
   }
 

@@ -37,7 +37,8 @@
   }
   .cell:hover { border-color: var(--hover); transform: translateY(-1px); }
   .cell.parent { border-color: var(--glow); cursor: default; transform: none; }
-  canvas { display: block; width: 100%; aspect-ratio: 1; }
+  canvas { display: block; width: 100%; }
+  .cell canvas { aspect-ratio: 1; }
   .gene {
     font-size: 11px; color: var(--dim); padding: 4px 6px 6px; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
@@ -71,18 +72,19 @@
   }
 
   h2 { font-weight: normal; font-size: 18px; margin: 32px 0 8px; }
-  .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
-  .card { background: var(--cell); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-  .card canvas { cursor: pointer; }
-  .card .nm { font-style: italic; font-size: 12px; line-height: 1.25; padding: 2px 6px 0; min-height: 2.5em; }
-  .card .acts { display: flex; }
-  .card .acts button {
-    flex: 1; border: 0; border-top: 1px solid var(--line); border-radius: 0;
-    padding: 5px 0; font-size: 11px; color: var(--dim);
+  #garden {
+    aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+    background: linear-gradient(#090b10, var(--cell) 74%, #0d1017);
   }
-  .card .acts button + button { border-left: 1px solid var(--line); }
-  .card .acts button:hover { color: var(--ink); }
-  .empty { color: var(--dim); font-style: italic; }
+  #garden:focus-visible { outline: 1px solid var(--glow); }
+  @media (max-width: 520px) { #garden { aspect-ratio: 4 / 3; } }
+  .plot { display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: center; margin: 8px 0 0; min-height: 2.4em; }
+  .plot .who { flex: 1 1 200px; min-width: 0; color: var(--dim); font-style: italic; }
+  .plot .who b { color: var(--ink); font-weight: normal; font-size: 17px; }
+  .plot .who code { font-style: normal; font-size: 11px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .plot .acts { display: flex; gap: 6px; }
+  .plot .acts[hidden] { display: none; }
+  .plot .acts button { padding: 5px 10px; font-size: 12px; }
 
   dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 0; }
   dt { color: var(--glow); font-family: var(--mono); }
@@ -96,8 +98,21 @@
 <body>
 <main>
   <h1>murmur</h1>
-  <div class="sub">a garden of very small programs. the one in the middle is the parent; click a child to follow it.</div>
+  <div class="sub">a garden of very small programs. everything growing here is a line of text.</div>
 
+  <canvas id="garden" tabindex="0" role="img" aria-label="The garden: every creature you have planted, growing together"></canvas>
+  <div class="plot">
+    <div class="who" id="who" aria-live="polite"></div>
+    <div class="acts" id="acts" hidden>
+      <button id="breed" title="take it down to the nursery as the parent">breed from it</button>
+      <button id="cross" title="fill the nursery with children of this one and the current parent">cross</button>
+      <button id="uproot" title="take it out of the garden">uproot</button>
+    </div>
+  </div>
+
+  <h2>nursery</h2>
+  <p>The one in the middle is the parent, and the eight around it are its children, each one small
+     accident away. Tap a child to follow it. <code>plant</code> the ones worth keeping.</p>
   <div class="grid" id="grid"></div>
 
   <div class="notes" id="notes" aria-live="polite">
@@ -110,16 +125,11 @@
     <button id="scatter" title="a new litter from the same parent">scatter</button>
     <button id="wild" title="a creature from nowhere">wild</button>
     <button id="drift" title="let the garden follow whichever child is least like anything it has seen">drift</button>
-    <button id="press" title="keep this one in the herbarium">press</button>
+    <button id="plant" title="put this one in the garden, where it stays">plant</button>
     <button id="save" title="download this one as an SVG">svg</button>
   </div>
   <div class="row" id="seeds"><span class="lbl">specimens</span></div>
   <div class="row" id="line"><span class="lbl">lineage</span></div>
-
-  <h2>herbarium</h2>
-  <div class="shelf" id="shelf"></div>
-  <p class="empty" id="shelf-empty">Nothing pressed yet. When you find one worth keeping, <code>press</code> it;
-     it stays in this browser, and you can <code>cross</code> it with whatever is growing.</p>
 
   <h2>the language</h2>
   <p>There is no such thing as a syntax error here. Every string is a program, every program is a
@@ -143,7 +153,11 @@
   <p><i>Dimension</i> is measured, not looked up: the creature is laid on grids of finer and finer
      boxes, and the rate at which it fills them is the number. A line scores 1, a solid 2. It is a
      rough ruler held against a finite drawing, so Koch reads about 1.2 where the ideal curve is 1.26.</p>
-  <p><i>Drift</i> lets the garden choose for itself. It keeps a memory of every shape it has passed
+  <p><i>The garden</i> arranges itself, and remembers what you planted in this browser. Anything with
+     a root stands on the ground, nearer ones larger and brighter. Anything with rotational symmetry
+     has no up, so it hangs in the sky. Spacing follows the golden ratio, the way leaves are spaced
+     around a stem, so however many things you plant they never line up.</p>
+  <p><i>Drift</i> lets the nursery choose for itself. It keeps a memory of every shape it has passed
      through and follows the child that looks least like any of them.</p>
 
   <footer>Made by Claude Fable 5.2, an AI model from Anthropic, in a repository Volodya gave it empty for the purpose.
@@ -199,10 +213,12 @@ const SEEDS = [
   ['discs', 'f+[+4[f+9)|+)4|+)4|c|o-+-*>[oo-]'],
 ];
 const GROW_TIME = 0.55, DRIFT_EVERY = 2600;
+// people who ask their system for less motion get still creatures that appear at once
+const calm = matchMedia('(prefers-reduced-motion: reduce)');
 const $ = id => document.getElementById(id);
 const grid = $('grid'), input = $('src');
 const cells = [], archive = [];
-let parent, lineage = [], now = 0, drifting = null;
+let parent, lineage = [], now = 0, drifting = null, cellTurn = 0;
 
 for (let i = 0; i < 9; i++) {
   const el = document.createElement('button');
@@ -289,31 +305,163 @@ function setDrift(on) {
   if (on) driftStep();
 }
 
-// ---------- herbarium ----------
-const KEY = 'murmur.herbarium';
-let pressed = [];
-try { pressed = (JSON.parse(localStorage.getItem(KEY)) || []).map(M.clean).filter(Boolean); } catch (e) {}
-const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(pressed)); } catch (e) {} };
+// ---------- the garden: everything planted, growing in one place ----------
+const PHI = 0.6180339887, RHO = 0.7548776662;  // golden and plastic ratios: evenly spread, never repeating
+const frac = v => v - Math.floor(v);
+const KEY = 'murmur.garden', ROOM = 16, SETTLE = 1.1, HORIZON = 0.74;
+// what is growing when you first arrive: [genome, plot number]
+const FIRST_PLANTING = [
+  ['~f[+<*][-<*]', 0], ['~f[+<*]f[-(<*]<*', 1], ['~f[+<*][2<*]', 2], ['*f[f[[]*f*]+', 3],
+  ['~f[+<*]f[-(<*]<*8*8', 4], ['6f[+<*][-<*]<*ooooo', 5],
+  ['++4o+-+4+[+4[ff(+9)-|5f~f6|+)[+)[|c|]o--+-*>o[oc', 6], ['5*-*++*-*cooooo', 7],
+];
+const gcv = $('garden'), gctx = gcv.getContext('2d');
+const plants = new Map();
+let garden = loadGarden(), rows = [], chosen = null, gardenDirty = true, turn = 0;
 
-function showShelf() {
-  const shelf = $('shelf');
-  shelf.textContent = '';
-  $('shelf-empty').hidden = pressed.length > 0;
-  pressed.forEach(g => {
-    const card = document.createElement('div'); card.className = 'card';
-    const cv = document.createElement('canvas'); cv.width = cv.height = 220;
-    cv.title = g; cv.onclick = () => adopt(g);
-    paint(cv.getContext('2d'), 220, g, M.fit(g), 0, 1);
-    const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = M.name(g);
-    const acts = document.createElement('div'); acts.className = 'acts';
-    const x = document.createElement('button'); x.textContent = 'cross';
-    x.title = 'fill the litter with children of this one and the current parent';
-    x.onclick = () => { if (parent && cells[4].fit) fillLitter(M.crossbreed(parent, g)); grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
-    const rm = document.createElement('button'); rm.textContent = 'remove';
-    rm.onclick = () => { pressed = pressed.filter(p => p !== g); keep(); showShelf(); };
-    acts.append(x, rm); card.append(cv, nm, acts); shelf.append(card);
-  });
+function loadGarden() {
+  const tidy = list => {
+    const seen = new Set();
+    return list.map(p => ({ g: M.clean(p.g), slot: p.slot | 0 }))
+      .filter(p => p.g && !seen.has(p.g) && seen.add(p.g)).slice(0, ROOM);
+  };
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw !== null) return tidy(JSON.parse(raw));
+    const old = JSON.parse(localStorage.getItem('murmur.herbarium'));   // from before there was a garden
+    if (Array.isArray(old) && old.length) return tidy(old.map((g, slot) => ({ g, slot })));
+  } catch (e) {}
+  return FIRST_PLANTING.map(([g, slot]) => ({ g, slot }));
 }
+const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(garden)); } catch (e) {} };
+
+// Decide where everything stands. Nothing here is random: a plant's plot number fixes its place,
+// so the garden looks the same tomorrow and nothing moves when a neighbour is uprooted.
+function layGarden() {
+  const W = gcv.width, H = gcv.height, live = new Set();
+  for (const { g, slot } of garden) {
+    live.add(g);
+    let p = plants.get(g);
+    if (!p) {
+      p = { g, f: M.fit(g), sky: M.copiesOf(g) > 1, sways: g.includes('~'), born: now,
+            sprite: document.createElement('canvas'), dirty: true };
+      p.ctx = p.sprite.getContext('2d');
+      plants.set(g, p);
+    }
+    if (!p.f) continue;
+    const u = frac(0.5 + slot * PHI), v = frac(0.3 + slot * RHO);
+    p.cx = W * (0.07 + 0.86 * u);
+    if (p.sky) {            // no root, no up: it belongs overhead
+      p.z = -1; p.S = H * (0.2 + 0.13 * v); p.alpha = 0.8;
+      p.cy = H * (0.15 + 0.2 * frac(v * 7.3));
+    } else {                // rooted: stands on its lowest point, nearer means lower, larger, brighter
+      p.z = v; p.S = H * (0.36 + 0.44 * v); p.alpha = 0.45 + 0.55 * v;
+      p.cy = H * (HORIZON + 0.2 * v) - p.f.h / 2 * (p.S * 0.84 / p.f.ext);
+    }
+    const sc = p.S * 0.84 / p.f.ext, px = Math.max(16, Math.round(p.S));
+    p.hw = Math.max(H * 0.04, p.f.w * sc / 2); p.hh = Math.max(H * 0.04, p.f.h * sc / 2);
+    p.cx = Math.min(W - p.hw - W * 0.015, Math.max(p.hw + W * 0.015, p.cx));   // keep it inside the fence
+    if (p.sprite.width !== px) { p.sprite.width = p.sprite.height = px; p.dirty = true; }
+  }
+  for (const g of plants.keys()) if (!live.has(g)) plants.delete(g);
+  rows = [...plants.values()].filter(p => p.f).sort((a, b) => a.z - b.z);   // far to near
+  gardenDirty = true;
+}
+
+function drawGarden() {
+  const W = gcv.width, H = gcv.height, horizon = H * HORIZON;
+  gctx.setTransform(1, 0, 0, 1, 0, 0);
+  gctx.clearRect(0, 0, W, H);
+  // the ground: a seam of warm light where it meets the dark, fading toward you
+  const glow = gctx.createLinearGradient(0, horizon, 0, H);
+  glow.addColorStop(0, 'rgba(242, 200, 121, 0.04)'); glow.addColorStop(1, 'rgba(242, 200, 121, 0)');
+  gctx.fillStyle = glow; gctx.fillRect(0, horizon, W, H - horizon);
+  gctx.fillStyle = 'rgba(242, 200, 121, 0.22)'; gctx.fillRect(0, horizon, W, Math.max(1, H / 500));
+  for (const p of rows) {
+    gctx.globalAlpha = p.alpha;
+    gctx.drawImage(p.sprite, p.cx - p.S / 2, p.cy - p.S / 2, p.S, p.S);
+  }
+  gctx.globalAlpha = 1;
+  const c = plants.get(chosen);
+  if (c && c.f) {           // a short line of light under the chosen one
+    gctx.fillStyle = '#f2c879';
+    gctx.fillRect(c.cx - c.hw, Math.min(H - 3, c.cy + c.hh + H * 0.012), c.hw * 2, Math.max(2, H / 240));
+  }
+}
+
+// Each plant is kept as a small picture of itself. New arrivals grow in; of the ones that sway,
+// one is redrawn per frame in turn, which costs the same however large the garden gets.
+function tendGarden() {
+  const dpr = Math.min(2, devicePixelRatio || 1);
+  const w = Math.round(gcv.clientWidth * dpr), h = Math.round(gcv.clientHeight * dpr);
+  if (w && h && (gcv.width !== w || gcv.height !== h)) { gcv.width = w; gcv.height = h; layGarden(); }
+  let touched = gardenDirty;
+  const swaying = [];
+  for (const p of rows) {
+    const age = calm.matches ? 1 : (now - p.born) / SETTLE, growing = age < 1;
+    if (p.dirty || growing) {
+      paint(p.ctx, p.sprite.width, p.g, p.f, now, growing ? 1 - Math.pow(1 - Math.max(0, age), 3) : 1);
+      p.dirty = growing; touched = true;
+    } else if (p.sways && !calm.matches) swaying.push(p);
+  }
+  if (swaying.length) {
+    const p = swaying[turn++ % swaying.length];
+    paint(p.ctx, p.sprite.width, p.g, p.f, now, 1); touched = true;
+  }
+  if (touched) { drawGarden(); gardenDirty = false; }
+}
+
+function choose(g, note) {
+  chosen = plants.has(g) ? g : null;
+  gardenDirty = true;
+  $('acts').hidden = !chosen;
+  const who = $('who');
+  who.textContent = '';
+  if (chosen) {
+    const b = document.createElement('b'), code = document.createElement('code');
+    b.textContent = M.name(chosen); code.textContent = chosen;
+    who.append(b, code);
+  } else {
+    who.textContent = note || (garden.length
+      ? `${garden.length} ${garden.length === 1 ? 'thing' : 'things'} growing. Tap one to pick it out.`
+      : 'Nothing is growing yet. Find something in the nursery and plant it.');
+  }
+}
+
+function plantParent() {
+  if (!parent || !cells[4].fit) return;
+  if (!garden.some(p => p.g === parent)) {
+    if (garden.length >= ROOM) { choose(null, 'The garden is full. Uproot something to make room.'); return; }
+    let slot = 0;
+    while (garden.some(p => p.slot === slot)) slot++;
+    garden.push({ g: parent, slot }); keep(); layGarden();
+  }
+  choose(parent);
+  gcv.scrollIntoView({ behavior: calm.matches ? 'auto' : 'smooth', block: 'nearest' });
+}
+
+gcv.onclick = e => {
+  const r = gcv.getBoundingClientRect(), k = gcv.width / r.width;
+  const x = (e.clientX - r.left) * k, y = (e.clientY - r.top) * k;
+  const hit = [...rows].reverse().find(p => Math.abs(x - p.cx) <= p.hw && Math.abs(y - p.cy) <= p.hh);
+  choose(hit ? hit.g : null);
+};
+gcv.onkeydown = e => {     // left and right walk along the garden; enter takes the chosen one to the nursery
+  if (e.key === 'Enter' && chosen) { adopt(chosen); return; }
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  const line = [...rows].sort((a, b) => a.cx - b.cx);
+  if (!line.length) return;
+  const i = line.findIndex(p => p.g === chosen), step = e.key === 'ArrowRight' ? 1 : -1;
+  choose(line[(i < 0 ? (step > 0 ? 0 : line.length - 1) : i + step + line.length) % line.length].g);
+};
+const toNursery = () => grid.scrollIntoView({ behavior: calm.matches ? 'auto' : 'smooth', block: 'nearest' });
+$('breed').onclick = () => { if (chosen) { adopt(chosen); toNursery(); } };
+$('cross').onclick = () => { if (chosen && parent && cells[4].fit) { fillLitter(M.crossbreed(parent, chosen)); toNursery(); } };
+$('uproot').onclick = () => {
+  if (!chosen) return;
+  garden = garden.filter(p => p.g !== chosen); keep(); layGarden(); choose(null);
+};
 
 // ---------- controls ----------
 SEEDS.forEach(([label, g]) => {
@@ -328,10 +476,7 @@ input.onchange = () => {
 $('scatter').onclick = () => { if (parent) scatter(); };
 $('wild').onclick = () => adopt(M.wild());
 $('drift').onclick = () => setDrift(!drifting);
-$('press').onclick = () => {
-  if (!parent || !cells[4].fit || pressed.includes(parent)) return;
-  pressed.push(parent); keep(); showShelf();
-};
+$('plant').onclick = plantParent;
 $('save').onclick = () => {
   if (!parent) return;
   const url = URL.createObjectURL(new Blob([M.toSVG(parent, { t: now })], { type: 'image/svg+xml' }));
@@ -346,9 +491,6 @@ const fromHash = () => {
 };
 addEventListener('hashchange', () => adopt(fromHash() || SEEDS[0][1]));
 
-// people who ask their system for less motion get still creatures that appear at once
-const calm = matchMedia('(prefers-reduced-motion: reduce)');
-
 function resize() {
   const dpr = Math.min(2, devicePixelRatio || 1);
   for (const c of cells) {
@@ -360,19 +502,29 @@ function resize() {
 function frame(ms) {
   resize();
   now = calm.matches ? 0 : ms / 1000;
+  const swaying = [];
   for (const c of cells) {
     const age = calm.matches ? 1 : (now - c.born) / GROW_TIME, growing = age < 1;
-    if (c.dirty || growing || (!calm.matches && c.g.includes('~'))) {
+    if (c.dirty || growing) {
       const e = growing ? 1 - Math.pow(1 - Math.max(0, age), 3) : 1;
       paint(c.ctx, c.cv.width, c.g, c.fit, now, e);
       c.dirty = growing;
-    }
+    } else if (!calm.matches && c.g.includes('~')) swaying.push(c);
   }
+  // the parent sways every frame; its children take turns, two at a time, so a phone keeps up
+  for (let k = 0, kids = 0; k < swaying.length && kids < 2; k++) {
+    const c = swaying[(cellTurn + k) % swaying.length];
+    if (c !== cells[4]) { paint(c.ctx, c.cv.width, c.g, c.fit, now, 1); kids++; }
+  }
+  cellTurn += 2;
+  if (swaying.includes(cells[4])) paint(cells[4].ctx, cells[4].cv.width, parent, cells[4].fit, now, 1);
+  tendGarden();
   requestAnimationFrame(frame);
 }
 
 adopt(fromHash() || SEEDS[0][1]);
-showShelf();
+layGarden();
+choose(null);
 requestAnimationFrame(frame);
 </script>
 </body>

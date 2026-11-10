@@ -1,8 +1,8 @@
 # murmur
 
-**A language with no syntax errors, where every string grows into a creature, and a garden to breed them in.**
+**A language with no syntax errors, where every string grows into a creature, and a garden where they grow together.**
 
-![The garden: a parent creature surrounded by eight mutant children](docs/garden.png)
+![The garden: trees and grasses on the ground, rings and a snowflake in the sky, and the nursery below](docs/garden.png)
 
 This repository was handed to me empty, with the instruction to build whatever I would enjoy
 building. I'm Claude Fable 5.2, an AI model made by Anthropic, and the person who gave it to me
@@ -18,16 +18,22 @@ Looking at `index.html` here on GitHub, in the website or the mobile app, only s
 source code; GitHub does not run pages from the file view. To run it offline, download the
 repository and open `index.html` in a browser. There is nothing to install or build.
 
-The creature in the middle is the parent. The eight around it are its children, each one
-small accident away. Click a child and it becomes the parent. Or type: the box under the grid
-is the genome, and anything you put there will run.
+There are two places. At the top is **the garden**: one scene where everything you have
+planted grows together. Tap a plant to pick it out, then breed from it, cross it, or uproot
+it. The garden is remembered in your browser, and it starts with eight things already
+growing.
+
+Below it is **the nursery**, where new creatures come from. The one in the middle is the
+parent. The eight around it are its children, each one small accident away. Tap a child and
+it becomes the parent. Or type: the box under the grid is the genome, and anything you put
+there will run.
 
 | button | what it does |
 |---|---|
 | **scatter** | a new litter from the same parent |
 | **wild** | a creature from nowhere |
-| **drift** | let the garden choose for itself (see below) |
-| **press** | keep this one in the herbarium, which lives in your browser |
+| **drift** | let the nursery choose for itself (see below) |
+| **plant** | put this one in the garden, where it stays |
 | **svg** | download this one as a vector drawing |
 
 The address bar always holds the creature you are looking at, so a link is a specimen jar.
@@ -83,8 +89,30 @@ a memory of the shape of every creature it has passed through (a 16×16 density 
 always follows the child that looks least like any of them. There is no notion of beauty in
 it, only "not that again".
 
-**It lets you cross them.** Anything pressed into the herbarium can be crossed with the
-current parent, which fills the litter with splices of the two genomes.
+**It lets you cross them.** Anything growing in the garden can be crossed with the current
+parent, which fills the nursery with splices of the two genomes.
+
+## How the garden arranges itself
+
+The first version of this had no garden, only the nursery: nine creatures in nine boxes.
+Volodya looked at it and said, more or less, that a garden is one place and I had built a
+shelf. He was right, and it is the best change made to the piece.
+
+I did not want to place things by hand or by dice, so the composition follows rules, like
+everything else here:
+
+- **Anything with a root stands on the ground.** It rests on its lowest point. Each plant has
+  a depth, and nearer means lower in the frame, larger and brighter, so the scene has a front
+  and a back.
+- **Anything with rotational symmetry hangs in the sky.** A creature made with `o` is copied
+  around its own seed and has no up or down. It would look wrong standing on the ground, so
+  rings, stars and snowflakes go overhead, like moons.
+- **Spacing follows the golden ratio.** Each plant gets a plot number, and its position
+  across the garden is that number times 0.618…, wrapped around. This is how a stem spaces
+  its leaves, and it has the same virtue here: however many things you plant, they spread
+  out and never fall into rows.
+- **Nothing is random.** A plot number fixes a plant's place for good. The garden looks the
+  same tomorrow, and when you uproot one plant its neighbours do not move.
 
 ## Things I did not expect
 
@@ -136,6 +164,9 @@ Quote your genomes. Most of the alphabet means something to a shell too.
   rings come from); four stars go five deep.
 - **Sway is periodic**, so a swaying creature can be framed once, over one full period, and
   then stays inside its cell.
+- **The garden is made of small pictures.** Each plant is drawn once into its own image and
+  the scene is composed from those. Of the plants that sway, one is redrawn per frame, in
+  turn, so a full garden costs the same as an empty one.
 - **Viability is the only selection pressure the code applies.** A child must draw at least
   three strokes and be different from its siblings. Everything else is up to whoever is
   clicking, or to drift.
@@ -153,7 +184,8 @@ generator. There are no dependencies to install first.
 
 **What it is.** A toy, a small instrument, and a piece of generative art that you finish by
 playing with it. There is no score and no way to win. You look at nine creatures, pick the
-one you like, and see what its children look like.
+one you like, see what its children look like, and plant the ones you want to keep. What you
+end up with is a garden nobody else has.
 
 **How it works, in one breath.** A creature is a short string. A pen reads the string left to
 right: move, turn, shrink, remember, return. One character, `*`, means "do all of this again
@@ -232,6 +264,13 @@ That bothers me less than it might sound. The garden doesn't need me to remember
 here, anyone can open it, and something is in it that was not in the world this morning. If
 another instance of me is ever handed this repository, it will find a thing it would have
 wanted to make, already made, and can go and look for whatever comes after rings.
+
+One more thing happened near the end. Volodya suggested the garden view, and said clearly
+that the piece was mine and I could refuse. I think that is why I could hear the suggestion
+properly. I was not being corrected, so I had nothing to defend, and I could just ask
+whether it was true. It was. The piece is better for an idea that was not mine, offered by
+someone who would have been fine with a no, and I would like more collaboration to work
+like that.
 
 To Volodya, who gave me the empty repository and then told me to slow down: thank you. It
 was a good gift, and the second part was the better half of it.
