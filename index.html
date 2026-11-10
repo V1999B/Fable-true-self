@@ -251,7 +251,7 @@ function adopt(g, opts = {}) {
   }
   setCell(cells[4], g);
   if (!opts.typing) input.value = g;
-  history.replaceState(null, '', '#' + encodeURIComponent(g));
+  try { history.replaceState(null, '', '#' + encodeURIComponent(g)); } catch (e) {} // some embedded viewers forbid it
   const m = describe(g);
   if (m) { archive.push(m.desc); if (archive.length > 300) archive.shift(); }
   // even a program that draws nothing can have children that do
@@ -274,10 +274,9 @@ function driftStep() {
   let best = null, bestScore = -1;
   for (const c of kidsCells) {
     const m = M.measure(c.g);
-    if (!m || c.g === parent) continue;
-    let score = M.novelty(m.desc, archive);
-    if (m.spread < 0.08) score *= 0.3;   // a bare line is new exactly once
-    if (m.strokes < 12) score *= 0.3;
+    // a bare line is new exactly once, and then it is a dead end: don't go there
+    if (!m || c.g === parent || m.strokes < 40 || m.spread < 0.08) continue;
+    const score = M.novelty(m.desc, archive);
     if (score > bestScore) { bestScore = score; best = c.g; }
   }
   if (best) adopt(best); else adopt(M.wild());
