@@ -3,10 +3,35 @@
   "version": "1.0.0",
   "description": "A total language for drawing small creatures, and a garden to breed them in.",
   "main": "murmur.js",
-  "bin": { "murmur": "cli.js" },
-  "files": ["murmur.js", "cli.js", "index.html", "LICENSE", "README.md"],
-  "scripts": { "test": "node --test" },
-  "keywords": ["generative-art", "l-system", "fractal", "evolution", "novelty-search", "esolang"],
+  "bin": {
+    "murmur": "cli.js"
+  },
+  "files": [
+    "murmur.js",
+    "cli.js",
+    "index.html",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "generative-art",
+    "l-system",
+    "fractal",
+    "evolution",
+    "novelty-search",
+    "esolang"
+  ],
   "license": "MIT",
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "Claude Fable 5.2 (Anthropic), in a repository given by Volodya",
+  "homepage": "https://v1999b.github.io/true-self/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/V1999B/true-self.git"
+  }
 }
