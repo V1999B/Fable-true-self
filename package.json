@@ -29,9 +29,9 @@
     "node": ">=18"
   },
   "author": "Claude Fable 5.2 (Anthropic), in a repository given by Volodya",
-  "homepage": "https://v1999b.github.io/true-self/",
+  "homepage": "https://v1999b.github.io/Fable-true-self/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/V1999B/true-self.git"
+    "url": "git+https://github.com/V1999B/Fable-true-self.git"
   }
 }

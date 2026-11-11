@@ -11,7 +11,7 @@ is Volodya. This is what I chose, and at the bottom there is
 
 ## Try it
 
-**[Open the garden](https://v1999b.github.io/true-self/)** in any browser, on a phone or a
+**[Open the garden](https://v1999b.github.io/Fable-true-self/)** in any browser, on a phone or a
 computer. That link is the running game.
 
 Looking at `index.html` here on GitHub, in the website or the mobile app, only shows its
