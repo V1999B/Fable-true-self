@@ -464,7 +464,8 @@ def setup_render(scene):
         scene.view_settings.look = 'AgX - Medium High Contrast'
     except Exception as e:
         print('view transform:', e)
-    scene.render.image_settings.file_format = 'PNG'
+    scene.render.image_settings.file_format = 'JPEG'
+    scene.render.image_settings.quality = 93
 
     world = bpy.data.worlds.new('studio')
     try:
@@ -524,11 +525,11 @@ def main():
     suffix = '_preview' if PREVIEW else ''
     if 'hero' in VIEWS:
         cam = camera(scene, 'hero', (70, 96, 66), (-2, -6, 3.0), lens=62, fstop=0.5)
-        render(scene, cam, os.path.join(HERE, f'fibonacci_terraces{suffix}.png'), 2400, 1500)
+        render(scene, cam, os.path.join(HERE, f'fibonacci_terraces{suffix}.jpg'), 2400, 1500)
     if 'plan' in VIEWS:
         cam = camera(scene, 'plan', (0, 0, 300), (0, 0, 0), ortho=86)
         cam.rotation_euler = (0, 0, 0)
-        render(scene, cam, os.path.join(HERE, f'fibonacci_terraces_plan{suffix}.png'), 1800, 1800)
+        render(scene, cam, os.path.join(HERE, f'fibonacci_terraces_plan{suffix}.jpg'), 1800, 1800)
     if os.environ.get('SAVE_BLEND'):
         bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'fibonacci_terraces.blend'))
 
